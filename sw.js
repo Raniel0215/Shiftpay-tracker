@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shiftpay-calendar-v2';
+const CACHE_NAME = 'shiftpay-v5-compactnav';
 const CORE_FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_FILES)));
