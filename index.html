@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ShiftPay">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>ShiftPay Tracker</title>
+<style>
+:root{--ink:#171827;--muted:#6b7280;--bg:#f5f6fb;--card:#fff;--line:#e6e8f0;--accent:#4f46e5;--soft:#eeedff;--danger:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{padding:22px 18px 16px;background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;border-radius:0 0 24px 24px}
+header h1{margin:0;font-size:27px}header p{margin:5px 0 0;color:#e0e7ff;font-size:14px}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px 12px 0;position:sticky;top:0;background:var(--bg);z-index:2}
+nav button{border:0;background:#e9eaf3;color:#4b5563;border-radius:12px;padding:11px 3px;font-weight:650;font-size:12px}
+nav button.active{background:var(--accent);color:white}
+main{padding:14px;max-width:760px;margin:auto}.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:0 2px 8px #10182808}
+h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:var(--soft);border-radius:14px;padding:13px;min-width:0}.metric small{display:block;color:#55558a;margin-bottom:6px}.metric strong{font-size:20px;overflow-wrap:anywhere}
+label{display:block;font-size:13px;color:#4b5563;font-weight:650;margin:10px 0 5px}
+input,select,textarea{width:100%;border:1px solid #d7dae5;background:white;border-radius:11px;padding:11px;font:inherit;color:var(--ink);min-height:43px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:700;background:var(--accent);color:white;width:100%;margin-top:12px;font-size:15px}.btn.secondary{background:#e9eaf3;color:#252641}.btn.danger{background:#fee2e2;color:var(--danger);width:auto;padding:7px 10px;margin:0}
+.item{padding:12px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.item:first-of-type{border-top:0}.sub{color:var(--muted);font-size:13px;line-height:1.5}.amount{text-align:right;font-weight:750;white-space:nowrap}
+.pill{display:inline-block;padding:4px 8px;background:#eef2ff;color:#4338ca;border-radius:999px;font-size:11px;font-weight:700}
+.note{font-size:12px;color:var(--muted);line-height:1.5}.empty{padding:16px;text-align:center;color:var(--muted);font-size:14px}
+@media(min-width:600px){main{padding:20px}.metrics{gap:14px}}
+</style>
+</head>
+<body>
+<header><h1>ShiftPay</h1><p>Your shifts, cutoff dates, and pay — in one place.</p></header>
+<nav>
+<button class="active" data-page="home">Overview</button><button data-page="shifts">Shifts</button><button data-page="jobs">Workplaces</button><button data-page="settings">Settings</button>
+</nav>
+<main>
+<section id="home" class="page active">
+ <div class="card">
+  <h2>Current pay period</h2><div id="periodLabel" class="sub"></div>
+  <div class="metrics" style="margin-top:12px">
+   <div class="metric"><small>Gross pay</small><strong id="periodGross">$0.00</strong></div>
+   <div class="metric"><small>Est. take-home</small><strong id="periodNet">$0.00</strong></div>
+  </div>
+  <p id="periodHours" class="sub"></p>
+ </div>
+ <div class="card"><h2>This month</h2><div class="metrics">
+  <div class="metric"><small>Gross pay</small><strong id="monthGross">$0.00</strong></div>
+  <div class="metric"><small>Est. take-home</small><strong id="monthNet">$0.00</strong></div>
+ </div></div>
+ <div class="card"><h2>Recent shifts</h2><div id="recent"></div></div>
+ <div class="note">Estimates are for planning only. They are not official payroll calculations.</div>
+</section>
+<section id="shifts" class="page">
+ <div class="card"><h2>Add a shift</h2>
+  <label for="shiftJob">Workplace</label><select id="shiftJob"></select>
+  <div class="row"><div><label for="shiftDate">Date</label><input id="shiftDate" type="date"></div><div><label for="breakMins">Unpaid break (minutes)</label><input id="breakMins" type="number" min="0" max="600" value="30"></div></div>
+  <div class="row"><div><label for="startTime">Start time</label><input id="startTime" type="time" value="09:00"></div><div><label for="endTime">End time</label><input id="endTime" type="time" value="17:00"></div></div>
+  <label for="shiftNotes">Notes (optional)</label><input id="shiftNotes" placeholder="e.g. evening shift">
+  <p id="shiftPreview" class="sub">Enter a shift to preview pay.</p>
+  <button class="btn" id="saveShift">Save shift</button>
+ </div>
+ <div class="card"><h2>All shifts</h2><div id="shiftList"></div></div>
+</section>
+<section id="jobs" class="page">
+ <div class="card"><h2>Add a workplace</h2>
+  <label for="jobName">Workplace name</label><input id="jobName" placeholder="e.g. Care home">
+  <label for="jobRate">Hourly rate ($)</label><input id="jobRate" type="number" min="0" step=".01" placeholder="25.00">
+  <label for="jobOT">Overtime multiplier</label><input id="jobOT" type="number" min="1" step=".1" value="1.5">
+  <button class="btn" id="saveJob">Add workplace</button>
+ </div>
+ <div class="card"><h2>Your workplaces</h2><div id="jobList"></div></div>
+</section>
+<section id="settings" class="page">
+ <div class="card"><h2>Payroll cutoff</h2><p class="note">Set the day of the month when a pay period starts and ends. This starter version supports cutoff days 1–28.</p>
+  <div class="row"><div><label for="cutStart">Period starts on day</label><select id="cutStart"></select></div><div><label for="cutEnd">Period ends on day</label><select id="cutEnd"></select></div></div>
+ </div>
+ <div class="card"><h2>Estimated deductions</h2>
+  <label for="taxPct">Income tax estimate (%)</label><input id="taxPct" type="number" min="0" max="100" step=".1">
+  <label for="cppPct">CPP estimate (%)</label><input id="cppPct" type="number" min="0" max="100" step=".01">
+  <label for="eiPct">EI estimate (%)</label><input id="eiPct" type="number" min="0" max="100" step=".01">
+  <button class="btn" id="saveSettings">Save settings</button>
+  <p class="note">Flat percentages are only rough estimates. Canadian payroll deductions depend on income, pay frequency, tax forms, year-to-date earnings, and current rates.</p>
+ </div>
+ <div class="card"><h2>Data and privacy</h2><p class="note">Your data is saved locally in this browser on this device. Clearing browser data or deleting the app/file may erase it. This starter version does not sync to iCloud and has no automatic backup.</p>
+  <button class="btn secondary" id="exportData">Export backup (JSON)</button><button class="btn secondary" id="exportCSV">Export shifts (CSV)</button><button class="btn secondary" id="importBtn">Import backup (JSON)</button><input id="importFile" type="file" accept="application/json" hidden>
+ </div>
+</section>
+</main>
+<script>
+const KEY='shiftpay-local-v1';
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const defaultData=()=>({jobs:[{id:crypto.randomUUID(),name:'My Workplace',rate:25,ot:1.5}],shifts:[],settings:{cutStart:1,cutEnd:15,tax:20,cpp:5.95,ei:1.64}});
+let data;
+try{data=JSON.parse(localStorage.getItem(KEY))||defaultData()}catch(e){data=defaultData()}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function money(n){return new Intl.NumberFormat('en-CA',{style:'currency',currency:'CAD'}).format(Number(n)||0)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function hours(s){let a=new Date(s.date+'T'+s.start),b=new Date(s.date+'T'+s.end);if(b<=a)return 0;return Math.max(0,(b-a)/3600000-(Number(s.breakMins)||0)/60)}
+function gross(s){let j=data.jobs.find(j=>j.id===s.jobId);if(!j)return 0;let h=hours(s);return h*(Number(j.rate)||0)}
+function netTotal(shifts){let g=shifts.reduce((a,s)=>a+gross(s),0),st=data.settings;return Math.max(0,g*(1-(Number(st.tax||0)+Number(st.cpp||0)+Number(st.ei||0))/100))}
+function parseDate(s){return new Date(s+'T00:00:00')}
+function periodBounds(ref=new Date()){
+ const st=Math.min(28,Math.max(1,Number(data.settings.cutStart)||1)),en=Math.min(28,Math.max(1,Number(data.settings.cutEnd)||15));
+ let y=ref.getFullYear(),m=ref.getMonth(),d=ref.getDate(),a,b;
+ if(st<=en){if(d>=st){a=new Date(y,m,st);b=new Date(y,m,en+1)}else{a=new Date(y,m-1,st);b=new Date(y,m,en+1)}}
+ else{if(d>=st){a=new Date(y,m,st);b=new Date(y,m+1,en+1)}else{a=new Date(y,m-1,st);b=new Date(y,m,en+1)}}
+ return [a,b];
+}
+function between(s,a,b){let d=parseDate(s.date);return d>=a&&d<b}
+function fmtDate(s){return parseDate(s).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})}
+function shiftItem(s,canDelete=true){let j=data.jobs.find(j=>j.id===s.jobId);return `<div class="item"><div><b>${esc(j?.name||'Deleted workplace')}</b><div class="sub">${fmtDate(s.date)} · ${esc(s.start)}–${esc(s.end)}</div><div class="sub">${hours(s).toFixed(2)} paid hours${s.notes?' · '+esc(s.notes):''}</div></div><div class="amount">${money(gross(s))}${canDelete?`<div style="margin-top:7px"><button class="btn danger" onclick="deleteShift('${s.id}')">Delete</button></div>`:''}</div></div>`}
+function render(){
+ const [a,b]=periodBounds(),period=data.shifts.filter(s=>between(s,a,b)),now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1),monthEnd=new Date(now.getFullYear(),now.getMonth()+1,1),month=data.shifts.filter(s=>between(s,monthStart,monthEnd));
+ document.getElementById('periodLabel').textContent=`${a.toLocaleDateString('en-CA',{month:'short',day:'numeric'})} – ${new Date(b-86400000).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})}`;
+ document.getElementById('periodGross').textContent=money(period.reduce((x,s)=>x+gross(s),0));document.getElementById('periodNet').textContent=money(netTotal(period));document.getElementById('periodHours').textContent=`${period.reduce((x,s)=>x+hours(s),0).toFixed(2)} hours · ${period.length} shifts`;
+ document.getElementById('monthGross').textContent=money(month.reduce((x,s)=>x+gross(s),0));document.getElementById('monthNet').textContent=money(netTotal(month));
+ document.getElementById('recent').innerHTML=data.shifts.length?data.shifts.slice().sort((x,y)=>(y.date+y.start).localeCompare(x.date+x.start)).slice(0,5).map(s=>shiftItem(s,false)).join(''):'<div class="empty">No shifts yet. Add your first shift in the Shifts tab.</div>';
+ document.getElementById('shiftJob').innerHTML=data.jobs.map(j=>`<option value="${j.id}">${esc(j.name)} · ${money(j.rate)}/hr</option>`).join('');
+ document.getElementById('shiftList').innerHTML=data.shifts.length?data.shifts.slice().sort((x,y)=>(y.date+y.start).localeCompare(x.date+x.start)).map(shiftItem).join(''):'<div class="empty">No shifts recorded yet.</div>';
+ document.getElementById('jobList').innerHTML=data.jobs.length?data.jobs.map(j=>`<div class="item"><div><b>${esc(j.name)}</b><div class="sub">${money(j.rate)}/hour · overtime multiplier ${Number(j.ot||1.5)}×</div><div style="margin-top:8px"><button class="btn secondary" style="width:auto;margin:0;padding:7px 10px" onclick="editJob('${j.id}')">Edit rate</button> <button class="btn danger" onclick="deleteJob('${j.id}')">Delete</button></div></div></div>`).join(''):'<div class="empty">Add a workplace to start.</div>';
+ document.getElementById('cutStart').value=data.settings.cutStart;document.getElementById('cutEnd').value=data.settings.cutEnd;
+ document.getElementById('taxPct').value=data.settings.tax;document.getElementById('cppPct').value=data.settings.cpp;document.getElementById('eiPct').value=data.settings.ei;
+ preview();
+}
+function preview(){let id=document.getElementById('shiftJob').value,j=data.jobs.find(j=>j.id===id),date=document.getElementById('shiftDate').value,start=document.getElementById('startTime').value,end=document.getElementById('endTime').value,br=Number(document.getElementById('breakMins').value)||0;if(!j||!date||!start||!end){document.getElementById('shiftPreview').textContent='Enter a shift to preview pay.';return}let s={jobId:id,date,start,end,breakMins:br};document.getElementById('shiftPreview').textContent=end<=start?'End time must be later than start time. For overnight shifts, enter the next-day end date in a future version.':`${hours(s).toFixed(2)} paid hours · Estimated gross ${money(gross(s))}`;}
+function deleteShift(id){if(confirm('Delete this shift?')){data.shifts=data.shifts.filter(s=>s.id!==id);save()}}
+function deleteJob(id){let j=data.jobs.find(j=>j.id===id);if(!confirm(`Delete ${j?.name||'this workplace'} and its associated shifts?`))return;data.jobs=data.jobs.filter(j=>j.id!==id);data.shifts=data.shifts.filter(s=>s.jobId!==id);save()}
+function editJob(id){let j=data.jobs.find(j=>j.id===id);if(!j)return;let n=prompt('Workplace name',j.name);if(n===null)return;let r=prompt('Hourly rate ($)',j.rate);if(r===null)return;let o=prompt('Overtime multiplier (saved for future overtime features)',j.ot||1.5);j.name=n.trim()||j.name;j.rate=Math.max(0,Number(r)||0);j.ot=Math.max(1,Number(o)||1.5);save()}
+document.querySelectorAll('nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===btn.dataset.page));}));
+[ 'shiftJob','shiftDate','startTime','endTime','breakMins'].forEach(id=>document.getElementById(id).addEventListener('input',preview));
+document.getElementById('shiftDate').value=today();
+document.getElementById('saveShift').onclick=()=>{let s={id:crypto.randomUUID(),jobId:document.getElementById('shiftJob').value,date:document.getElementById('shiftDate').value,start:document.getElementById('startTime').value,end:document.getElementById('endTime').value,breakMins:Number(document.getElementById('breakMins').value)||0,notes:document.getElementById('shiftNotes').value.trim()};if(!s.jobId){alert('Add a workplace first.');return}if(!s.date||!s.start||!s.end||s.end<=s.start){alert('Please enter a valid date and make sure end time is later than start time.');return}data.shifts.push(s);data.shifts.sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start));document.getElementById('shiftNotes').value='';save();alert('Shift saved on this device.')};
+document.getElementById('saveJob').onclick=()=>{let name=document.getElementById('jobName').value.trim(),rate=Number(document.getElementById('jobRate').value),ot=Number(document.getElementById('jobOT').value)||1.5;if(!name||document.getElementById('jobRate').value===''||rate<0){alert('Enter a workplace name and a valid hourly rate.');return}data.jobs.push({id:crypto.randomUUID(),name,rate,ot:Math.max(1,ot)});document.getElementById('jobName').value='';document.getElementById('jobRate').value='';save();alert('Workplace added.')};
+document.getElementById('saveSettings').onclick=()=>{data.settings.cutStart=Number(document.getElementById('cutStart').value);data.settings.cutEnd=Number(document.getElementById('cutEnd').value);data.settings.tax=Math.max(0,Number(document.getElementById('taxPct').value)||0);data.settings.cpp=Math.max(0,Number(document.getElementById('cppPct').value)||0);data.settings.ei=Math.max(0,Number(document.getElementById('eiPct').value)||0);save();alert('Settings saved.')};
+document.getElementById('exportData').onclick=()=>download('shiftpay-backup.json',JSON.stringify(data,null,2),'application/json');
+document.getElementById('exportCSV').onclick=()=>{let rows=[['Date','Workplace','Start','End','Unpaid break minutes','Paid hours','Hourly rate','Gross pay','Notes'],...data.shifts.map(s=>{let j=data.jobs.find(j=>j.id===s.jobId);return [s.date,j?.name||'',s.start,s.end,s.breakMins,hours(s).toFixed(2),j?.rate||0,gross(s).toFixed(2),s.notes||'']})];download('shiftpay-shifts.csv',rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')};
+function download(name,content,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let x=JSON.parse(await f.text());if(!Array.isArray(x.jobs)||!Array.isArray(x.shifts)||!x.settings)throw Error();if(confirm('Import will replace the current saved data. Continue?')){data=x;save();alert('Backup imported.')}}catch(err){alert('That file does not look like a ShiftPay backup.')}e.target.value=''};
+for(let id of ['cutStart','cutEnd']){let el=document.getElementById(id);for(let i=1;i<=28;i++)el.add(new Option('Day '+i,i))}
+render();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Offline setup unavailable:', err));
+  });
+}
+</script>
+</body>
+</html>
