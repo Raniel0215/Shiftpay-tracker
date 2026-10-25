@@ -1,10 +1,5 @@
-SHIFT PAY CALENDAR EDITION
+ShiftPay Tracker - fixed navigation layout
 
-Upload these items to the root of your existing GitHub repository:
-- index.html
-- manifest.webmanifest
-- sw.js
-- icons folder (with icon-192.png and icon-512.png)
+Upload index.html and sw.js to the root of your existing GitHub repository and commit the changes. Keep manifest.webmanifest and the icons folder.
 
-For the icons, upload the files into an icons folder in GitHub. Do not upload the ZIP itself.
-Then commit changes. GitHub Pages will republish the site.
+This update forces the five bottom navigation items to remain on one row on narrow iPhone screens and adds scroll space below the shift list so Edit/Delete controls can be reached.
