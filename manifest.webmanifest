@@ -1,7 +1,7 @@
 {
   "name": "ShiftPay Tracker",
   "short_name": "ShiftPay",
-  "description": "Track shifts, workplaces, pay periods, and estimated pay.",
+  "description": "Calendar-based shift and pay tracker",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
